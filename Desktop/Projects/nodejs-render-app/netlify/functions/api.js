@@ -1,17 +1,19 @@
 require('dotenv').config();
 const express = require('express');
 const axios = require('axios');
+const serverless = require('serverless-http');
+
 const app = express();
-const port = process.env.PORT || 3000;
+const router = express.Router();
 
 // Middleware to parse JSON bodies
-app.use(express.json());
+router.use(express.json());
 
 // Serve static files from the 'public' directory
-app.use(express.static('public'));
+router.use(express.static('public'));
 
 // API endpoint for YandexGPT interaction
-app.post('/api/yandex', async (req, res) => {
+router.post('/yandex', async (req, res) => {
     const { prompt } = req.body;
     const { YANDEX_API_KEY, YANDEX_FOLDER_ID } = process.env;
 
@@ -81,6 +83,6 @@ app.post('/api/yandex', async (req, res) => {
     }
 });
 
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
-});
+app.use('/.netlify/functions/api', router);
+
+module.exports.handler = serverless(app);
